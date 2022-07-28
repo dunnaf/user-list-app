@@ -5,27 +5,27 @@
   @for $i from 1 through length($sizes) {
     $size: nth($sizes, $i);
     .h-200-#{$prefix}#{$size} {
-      font-family: 'Heebo';
-      font-weight: 200;
-      font-size: $toPx * $size;
+      font-family: 'Heebo' !important;
+      font-weight: 200 !important;
+      font-size: $toPx * $size !important;
     }
   }
 
   @for $i from 1 through length($sizes) {
     $size: nth($sizes, $i);
     .h-400-#{$prefix}#{$size} {
-      font-family: 'Heebo';
-      font-weight: 400;
-      font-size: $toPx * $size;
+      font-family: 'Heebo' !important;
+      font-weight: 400 !important;
+      font-size: $toPx * $size !important;
     }
   }
 
   @for $i from 1 through length($sizes) {
     $size: nth($sizes, $i);
     .h-700-#{$prefix}#{$size} {
-      font-family: 'Heebo';
-      font-weight: 700;
-      font-size: $toPx * $size;
+      font-family: 'Heebo' !important;
+      font-weight: 700 !important;
+      font-size: $toPx * $size !important;
     }
   }
 }

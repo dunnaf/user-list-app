@@ -6,7 +6,7 @@
     $color: nth($colors, $i);
     $colorName: str-slice($color, 2);
     .#{$prefix}-#{$colorName} {
-      #{$property}: #{$color};
+      #{$property}: #{$color} !important;
     }
   }
 }
