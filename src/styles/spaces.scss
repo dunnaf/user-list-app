@@ -1,0 +1,33 @@
+@import 'variables.scss';
+
+// Generate Line Height
+@mixin generateLineHeight($prefix, $property) {
+  @for $i from 1 through length($sizes) {
+    $size: nth($sizes, $i);
+    .#{$prefix}-#{$size} {
+      #{$property}: $toPx * $size;
+    }
+  }
+}
+
+@include generateLineHeight('lh', line-height);
+
+// SM - Small devices (landscape phones, 576px and up)
+@media (min-width: 576px) {
+  @include generateLineHeight('lh-sm-', line-height);
+}
+
+// MD - Medium devices (tablets, 768px and up) The navbar toggle appears at this breakpoint
+@media (min-width: 768px) {
+  @include generateLineHeight('lh-md-', line-height);
+}
+
+// LG - Large devices (desktops, 992px and up)
+@media (min-width: 992px) {
+  @include generateLineHeight('lh-lg-', line-height);
+}
+
+// XL - Extra large devices (large desktops, 1200px and up)
+@media (min-width: 1200px) {
+  @include generateLineHeight('lh-xl-', line-height);
+}

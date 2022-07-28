@@ -1,0 +1,53 @@
+@import 'variables.scss';
+
+// Generate Font
+@mixin generateFont($prefix) {
+  @for $i from 1 through length($sizes) {
+    $size: nth($sizes, $i);
+    .h-200-#{$prefix}#{$size} {
+      font-family: 'Heebo';
+      font-weight: 200;
+      font-size: $toPx * $size;
+    }
+  }
+
+  @for $i from 1 through length($sizes) {
+    $size: nth($sizes, $i);
+    .h-400-#{$prefix}#{$size} {
+      font-family: 'Heebo';
+      font-weight: 400;
+      font-size: $toPx * $size;
+    }
+  }
+
+  @for $i from 1 through length($sizes) {
+    $size: nth($sizes, $i);
+    .h-700-#{$prefix}#{$size} {
+      font-family: 'Heebo';
+      font-weight: 700;
+      font-size: $toPx * $size;
+    }
+  }
+}
+
+@include generateFont('');
+
+// SM - Small devices (landscape phones, 576px and up)
+@media (min-width: 576px) {
+  @include generateFont('sm-');
+}
+
+// MD - Medium devices (tablets, 768px and up) The navbar toggle appears at this breakpoint
+@media (min-width: 768px) {
+  @include generateFont('md-');
+}
+
+// LG - Large devices (desktops, 992px and up)
+@media (min-width: 992px) {
+  @include generateFont('lg-');
+}
+
+// XL - Extra large devices (large desktops, 1200px and up)
+@media (min-width: 1200px) {
+  @include generateFont('xl-');
+}

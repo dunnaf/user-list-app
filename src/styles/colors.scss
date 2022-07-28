@@ -1,0 +1,34 @@
+@import 'variables.scss';
+
+// Generate Colors 
+@mixin generateColors($prefix, $property) {
+  @for $i from 1 through length($colors) {
+    $color: nth($colors, $i);
+    $colorName: str-slice($color, 2);
+    .#{$prefix}-#{$colorName} {
+      #{$property}: #{$color};
+    }
+  }
+}
+
+@include generateColors('c', 'color');
+
+// SM - Small devices (landscape phones, 576px and up)
+@media (min-width: 576px) {
+  @include generateColors('c-sm', 'color');
+}
+
+// MD - Medium devices (tablets, 768px and up) The navbar toggle appears at this breakpoint
+@media (min-width: 768px) {
+  @include generateColors('c-md', 'color');
+}
+
+// LG - Large devices (desktops, 992px and up)
+@media (min-width: 992px) {
+  @include generateColors('c-lg', 'color');
+}
+
+// XL - Extra large devices (large desktops, 1200px and up)
+@media (min-width: 1200px) {
+  @include generateColors('c-xl', 'color');
+}
