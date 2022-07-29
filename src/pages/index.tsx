@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import { Box, Grid, Link, Typography } from "@mui/material";
 import LinkHref from "next/link";
 
-const Name: NextPage = () => {
+const Home: NextPage = () => {
   return (
     <>
       <Box
@@ -73,4 +73,4 @@ const Name: NextPage = () => {
   );
 };
 
-export default Name;
+export default Home;
