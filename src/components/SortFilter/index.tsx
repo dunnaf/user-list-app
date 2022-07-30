@@ -30,6 +30,8 @@ const SortFilterComponent: React.FC<Props> = ({
     handleSearch(debouncedKey || "");
   }, [debouncedKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
+
+  // On Filter
   const [selectedGender, setSelectedGender] = useState<string>("all");
   const genders: string[] = ["male", "female"];
   const onChangeSelectedGender = (event: SelectChangeEvent<string>) => {

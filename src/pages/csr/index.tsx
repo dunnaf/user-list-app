@@ -1,9 +1,10 @@
 import { Box, Container, Typography } from "@mui/material";
+import { GridSortDirection } from "@mui/x-data-grid";
 import moment from "moment";
 import type { NextPage } from "next";
 import { NextRouter, useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import BreadcrumbsComponent from "~/components/Breadcrumbs";
 import DataTableComponent from "~/components/DataTable";
 import PaginationComponent from "~/components/Pagination";
@@ -18,24 +19,35 @@ const CSRPage: NextPage = () => {
   // Dispatch Store
   const dispatch = useDispatch();
 
+  // Loading State
+  const [loading, setLoading] = useState<boolean>(true);
+
   // Get User from Store
   const usersStore = useAppSelector((state) => state.users.data);
 
   // Get Router
   const router: NextRouter = useRouter();
-  const { page, pageSize, results, keyword, gender } = router.query;
 
-  // Loading State
-  const [loading, setLoading] = useState<boolean>(true);
+  // URL Params State
+  const [params, setParams] = useState<IUserParams>({
+    page: 1,
+    pageSize: 10,
+    results: 5,
+  });
 
+  // Users Data Table State
+  const [usersTable, setUsersTable] = useState<IUserTable[]>([]);
+
+  // Retrieve Users from Store
   const retrieveUsersFromStore = async (users: IUserTable[]) => {
     // Set Users Data for Data Table
-    setUsersTable(users);
+    await setUsersTable(users);
 
     // Set Off Loading Screen
-    setLoading(false);
+    await setLoading(false);
   };
 
+  // Retrieve Users from API
   const retrieveUsersFromAPI = async (params: IUserParams) => {
     try {
       // Get Endpoint
@@ -56,48 +68,23 @@ const CSRPage: NextPage = () => {
         };
       });
       if (newUsers.length > 0) {
-        dispatch(addUsers({ page: Number(page), users: newUsers }));
-        setUsersTable(newUsers);
-      }
+        await dispatch(addUsers({ page: params.page, users: newUsers }));
+        await setUsersTable(newUsers);
 
-      // Set Off Loading Screen
-      setLoading(false);
+        // Set Off Loading Screen
+        await setLoading(false);
+      }
     } catch (err) {
       console.log(err);
     }
   };
 
   // Get Reactive Users Data for Data Table
-  const [usersTable, setUsersTable] = useState<IUserTable[]>([]);
   useEffect(() => {
-    // Check Query
-    if (!page || !pageSize || !results) {
-      router.push("/csr/?page=1&pageSize=10&results=5");
-    } else {
-      const userStore = usersStore[Number(page)];
-      if (userStore) {
-        retrieveUsersFromStore(userStore);
-      } else {
-        // Set Request Params
-        const params: IUserParams = {
-          page: Number(page),
-          pageSize: Number(pageSize),
-          results: Number(results),
-        };
-        if (gender) params.gender = String(gender);
-        if (keyword) params.keyword = String(keyword);
-
-        // Retrieve Users
-        retrieveUsersFromAPI(params);
-      }
-    }
-
-    // Clean Users Data When Unmounted
-    return () => {
-      setLoading(true);
-      setUsersTable([]);
-    };
-  }, [page, pageSize, results, keyword, gender]); // eslint-disable-line react-hooks/exhaustive-deps
+    const userStore = usersStore[params.page];
+    if (userStore) retrieveUsersFromStore(userStore);
+    else retrieveUsersFromAPI(params);
+  }, [params]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // On Search Keyword
   const onSearch = (newKeyword: string) => {
@@ -108,16 +95,11 @@ const CSRPage: NextPage = () => {
     dispatch(resetUsers());
 
     // Set Request Params
-    const params: IUserParams = {
+    setParams({
+      ...params,
       page: 1,
-      pageSize: Number(pageSize),
-      results: Number(results),
-    };
-    if (newKeyword) params.keyword = String(newKeyword);
-    if (gender) params.gender = String(gender);
-
-    // Replace URL Query
-    router.replace({ query: { ...params } });
+      ...(newKeyword && { keyword: String(newKeyword) }),
+    });
   };
 
   // On Filter Gender
@@ -129,16 +111,11 @@ const CSRPage: NextPage = () => {
     dispatch(resetUsers());
 
     // Set Request Params
-    const params: IUserParams = {
+    setParams({
+      ...params,
       page: 1,
-      pageSize: Number(pageSize),
-      results: Number(results),
-    };
-    if (newGender !== "all") params.gender = String(newGender);
-    if (keyword) params.keyword = String(keyword);
-
-    // Replace URL Query
-    router.replace({ query: { ...params } });
+      ...(newGender !== "all" && { gender: String(newGender) }),
+    });
   };
 
   // Reset Search and Filter
@@ -149,8 +126,28 @@ const CSRPage: NextPage = () => {
     // Reset Users on Store
     dispatch(resetUsers());
 
-    // Redirect Page
-    router.push(`/csr/?page=1&pageSize=10&results=5`);
+    // Set Request Params
+    setParams({
+      page: 1,
+      pageSize: 10,
+      results: 5,
+    });
+  };
+
+  // On Sort Column
+  const onSort = (newSortBy: string, newSortOrder: GridSortDirection) => {
+    // Set On Loading Screen
+    setLoading(true);
+
+    // Reset Users on Store
+    dispatch(resetUsers());
+
+    // Set Request Params
+    setParams({
+      ...params,
+      sortBy: String(newSortBy),
+      sortOrder: String(newSortOrder),
+    });
   };
 
   // On Change Page
@@ -159,16 +156,7 @@ const CSRPage: NextPage = () => {
     setLoading(true);
 
     // Set Request Params
-    const params: IUserParams = {
-      page: newPage,
-      pageSize: Number(pageSize),
-      results: Number(results),
-    };
-    if (keyword) params.keyword = String(keyword);
-    if (gender) params.gender = String(gender);
-
-    // Replace URL Query
-    router.replace({ query: { ...params } });
+    setParams({ ...params, page: newPage });
   };
 
   return (
@@ -210,8 +198,12 @@ const CSRPage: NextPage = () => {
           handleFilter={onFilter}
           handleReset={onReset}
         />
-        <DataTableComponent users={usersTable} />
-        <PaginationComponent handleChange={onChangePage} />
+        <DataTableComponent
+          params={params}
+          users={usersTable}
+          handleSort={onSort}
+        />
+        <PaginationComponent params={params} handleChange={onChangePage} />
       </Container>
     </>
   );

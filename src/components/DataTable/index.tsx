@@ -1,17 +1,49 @@
 import { Box } from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { NextRouter, useRouter } from "next/router";
-import React from "react";
-import { IUserTable } from "~/types";
+import {
+  DataGrid,
+  GridColDef,
+  GridSortDirection,
+  GridSortItem,
+  GridSortModel,
+} from "@mui/x-data-grid";
+import React, { useEffect, useState } from "react";
+import { Props } from "./types";
 
-interface Props {
-  users: IUserTable[];
-}
+const DataTableComponent: React.FC<Props> = ({ params, users, handleSort }) => {
+  // Get URL Params
+  const { results, sortBy, sortOrder } = params;
 
-const DataTableComponent: React.FC<Props> = ({ users }) => {
-  // Get Router
-  const router: NextRouter = useRouter();
-  const { results } = router.query;
+  // Sort Model State
+  const [sortModel, setSortModel] = useState<GridSortItem[]>([]);
+
+  useEffect(() => {
+    // Set Model
+    const modelTemp: GridSortItem[] = [];
+
+    // Check Query
+    if (sortBy && sortOrder) {
+      const field: string = String(sortBy);
+      const sort: GridSortDirection = String(sortOrder) as GridSortDirection;
+      modelTemp.push({ field, sort });
+    }
+
+    // Set Sort Model
+    setSortModel(modelTemp);
+  }, [sortBy, sortOrder]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Handle Sort
+  const onSort = (model: GridSortModel) => {
+    if (model.length > 0) {
+      const sortBy: string = model[0].field;
+      const sortOrder: GridSortDirection = model[0].sort;
+
+      // Set Sort Model
+      setSortModel([model[0]]);
+
+      // Handle Sort from Props
+      handleSort(sortBy, sortOrder);
+    }
+  };
 
   // Data Table Configuration
   const columns: GridColDef[] = [
@@ -40,8 +72,10 @@ const DataTableComponent: React.FC<Props> = ({ users }) => {
           autoHeight
           columns={columns}
           hideFooter
-          pageSize={Number(results)}
+          pageSize={results}
           rows={users}
+          sortModel={sortModel}
+          onSortModelChange={onSort}
         />
       </Box>
     </>

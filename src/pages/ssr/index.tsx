@@ -11,6 +11,7 @@ import moment from "moment";
 import PaginationComponent from "~/components/Pagination";
 import { NextRouter, useRouter } from "next/router";
 import Apis from "~/plugins/axios/apis";
+import { GridSortDirection } from "@mui/x-data-grid";
 
 interface Props {
   usersRes: IUsersResponses;
@@ -19,13 +20,27 @@ interface Props {
 const SSRPage: NextPage<Props> = ({ usersRes }) => {
   // Get Router
   const router: NextRouter = useRouter();
-  const { page, pageSize, results, keyword, gender } = router.query;
+  const { page, pageSize, results, keyword, gender, sortBy, sortOrder } =
+    router.query;
 
   // Loading State
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Get Reactive Users Data for Data Table
+  // URL Params State
+  const [params, setParams] = useState<IUserParams>({
+    page: Number(page),
+    pageSize: Number(pageSize),
+    results: Number(results),
+    ...(keyword && { keyword: String(keyword) }),
+    ...(gender && { gender: String(gender) }),
+    ...(sortBy && { sortBy: String(sortBy) }),
+    ...(sortOrder && { sortOrder: String(sortOrder) }),
+  });
+
+  // Users Data Table State
   const [usersTable, setUsersTable] = useState<IUserTable[]>([]);
+
+  // Get URL Params and Data Users for Data Table
   useEffect(() => {
     if (usersRes) {
       // Set Users Data for Data Table
@@ -44,12 +59,6 @@ const SSRPage: NextPage<Props> = ({ usersRes }) => {
       // Set Off Loading Screen
       setLoading(false);
     }
-
-    // Clean Users Data When Unmounted
-    return () => {
-      setLoading(true);
-      setUsersTable([]);
-    };
   }, [usersRes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // On Search Keyword
@@ -57,12 +66,17 @@ const SSRPage: NextPage<Props> = ({ usersRes }) => {
     // Set On Loading Screen
     setLoading(true);
 
+    // Set Params
+    const paramsTemp: IUserParams = {
+      ...params,
+      page: 1,
+      keyword: newKeyword,
+    };
+    if (!newKeyword) delete paramsTemp.keyword;
+    setParams(paramsTemp);
+
     // Redirect Page
-    router.push(
-      `/ssr?page=1&pageSize=${pageSize}&results=${results}${
-        newKeyword === "" ? "" : `&keyword=${newKeyword}`
-      }${!gender ? "" : `&gender=${gender}`}`
-    );
+    router.push({ href: "/ssr", query: { ...paramsTemp } });
   };
 
   // On Filter Gender
@@ -70,12 +84,17 @@ const SSRPage: NextPage<Props> = ({ usersRes }) => {
     // Set On Loading Screen
     setLoading(true);
 
+    // Set Params
+    const paramsTemp: IUserParams = {
+      ...params,
+      page: 1,
+      gender: newGender,
+    };
+    if (newGender === "all") delete paramsTemp.gender;
+    setParams(paramsTemp);
+
     // Redirect Page
-    router.push(
-      `/ssr?page=1&pageSize=${pageSize}&results=${results}${
-        !keyword ? "" : `&keyword=${keyword}`
-      }${newGender === "all" ? "" : `&gender=${newGender}`}`
-    );
+    router.push({ href: "/ssr", query: { ...paramsTemp } });
   };
 
   // Reset Search and Filter
@@ -83,8 +102,33 @@ const SSRPage: NextPage<Props> = ({ usersRes }) => {
     // Set On Loading Screen
     setLoading(true);
 
+    // Set Params
+    const paramsTemp: IUserParams = {
+      page: 1,
+      pageSize: 10,
+      results: 5,
+    };
+    setParams(paramsTemp);
+
     // Redirect Page
-    router.push(`/ssr/?page=1&pageSize=10&results=5`);
+    router.push({ href: "/ssr", query: { ...paramsTemp } });
+  };
+
+  // On Sort Column
+  const OnSort = (newSortBy: string, newSortOrder: GridSortDirection) => {
+    // Set On Loading Screen
+    setLoading(true);
+
+    // Set Params
+    const paramsTemp: IUserParams = {
+      ...params,
+      sortBy: String(newSortBy),
+      sortOrder: String(newSortOrder),
+    };
+    setParams(paramsTemp);
+
+    // Redirect Page
+    router.push({ href: "/ssr", query: { ...paramsTemp } });
   };
 
   // On Change Page
@@ -92,12 +136,12 @@ const SSRPage: NextPage<Props> = ({ usersRes }) => {
     // Set On Loading Screen
     setLoading(true);
 
+    // Set Params
+    const paramsTemp: IUserParams = { ...params, page: newPage };
+    setParams(paramsTemp);
+
     // Redirect Page
-    router.push(
-      `/ssr?page=${newPage}&pageSize=${pageSize}&results=${results}${
-        !keyword ? "" : `&keyword=${keyword}`
-      }${!gender ? "" : `&gender=${gender}`}`
-    );
+    router.push({ href: "/ssr", query: { ...paramsTemp } });
   };
 
   return (
@@ -139,8 +183,12 @@ const SSRPage: NextPage<Props> = ({ usersRes }) => {
           handleFilter={onFilter}
           handleReset={onReset}
         />
-        <DataTableComponent users={usersTable} />
-        <PaginationComponent handleChange={onChangePage} />
+        <DataTableComponent
+          params={params}
+          users={usersTable}
+          handleSort={OnSort}
+        />
+        <PaginationComponent params={params} handleChange={onChangePage} />
       </Container>
     </>
   );
@@ -172,6 +220,8 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
       results: Number(query.results),
       keyword: String(query.keyword),
       gender: String(query.gender),
+      sortBy: String(query.sortBy),
+      sortOrder: String(query.sortBy),
     };
 
     // Retrieve Users
