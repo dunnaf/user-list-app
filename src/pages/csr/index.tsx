@@ -13,7 +13,7 @@ import Axios from "~/plugins/axios";
 import Apis from "~/plugins/axios/apis";
 import { useAppSelector } from "~/stores/hooks";
 import { addUsers, resetUsers } from "~/stores/reducer/users";
-import { IResults, IUserParams, IUsersResponses, IUserTable } from "~/types";
+import { IUserParams, IUsersResponses, IUserTable } from "~/types";
 
 const CSRPage: NextPage = () => {
   // Dispatch Store
@@ -164,7 +164,7 @@ const CSRPage: NextPage = () => {
       {loading && (
         <Box
           sx={{
-            position: "absolute",
+            position: "fixed",
             top: 0,
             width: "100vw",
             height: "100vh",
