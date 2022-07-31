@@ -1,9 +1,18 @@
 # Users List App
 
-This app shows a list of users in the Datatable.
-- [Homepage](https://ajaib-test-fawn.vercel.app/)
-- [SSR Page](https://ajaib-test-fawn.vercel.app/ssr)
-- [CSR Page](https://ajaib-test-fawn.vercel.app/csr)
+[Homepage](https://ajaib-test-fawn.vercel.app/)
+
+This page will display greetings from the developer, and a list of accessible pages.
+
+
+[SSR Page](https://ajaib-test-fawn.vercel.app/ssr) 
+
+This page will display a list of users in a paginated table, which is rendered SSR. You can find, sort, and filter data by using form or button which will be displayed, also all parameters will be shown in URL query and integrated, so you can also change data using URL query.
+
+
+[CSR Page](https://ajaib-test-fawn.vercel.app/csr)
+
+This page will display a list of users in a paginated table, which is CSR rendered. You can find, sort, and filter data by using the form or button which will be displayed, but the parameters will not be displayed in the URL query. User data pages that have been opened will be saved to the Redux Store, so there is no need to take the API again when you want to open previously opened pages.
 
 ## Installation
 
@@ -14,7 +23,7 @@ To clone and run this application, you'll need Git and Node.js (which comes with
 $ git clone https://github.com/dunnaf/ajaib-test.git
 
 # Go into the repository
-$ cd ajaib-test
+$ cd user-list-app
 
 # Install dependencies
 $ npm install
