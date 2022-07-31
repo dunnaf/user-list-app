@@ -43,9 +43,6 @@ npm run build
 
 // Run linter
 npm run lint
-
-// Run test
-npm run test
 ```
 
 ## Contributing
